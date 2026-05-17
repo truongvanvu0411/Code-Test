@@ -1,0 +1,8 @@
+{
+  "name": "RefactorSim: RoR Legacy Challenge",
+  "description": "A Dockerized Ruby refactoring simulation with real RSpec execution, hidden checks, baseline comparison, and reviewer-ready reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_DOCKERIZED_RUBY_RUNNER"
+  ]
+}

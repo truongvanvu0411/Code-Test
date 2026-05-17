@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#0F172A] text-slate-200 font-sans selection:bg-blue-500/30;
+  }
+}
+
+/* Prism Dark Style for High Density */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #e2e8f0;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 13px;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  line-height: 1.6;
+  tab-size: 4;
+  hyphens: none;
+}
+
+.token.comment { color: #64748b; font-style: italic; }
+.token.string { color: #10b981; }
+.token.number { color: #f59e0b; }
+.token.keyword { color: #ec4899; font-weight: bold; }
+.token.function { color: #3b82f6; }
+.token.class-name { color: #fbbf24; }
+.token.operator { color: #94a3b8; }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
