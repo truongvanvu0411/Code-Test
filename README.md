@@ -64,6 +64,22 @@ docker compose ps
 
 The `cloudflared` service should be running, and the app should be reachable at `https://rubytest.cjp-demo.online`.
 
+Current locally-managed tunnel on this machine:
+
+```text
+Tunnel name: refactorsim-rubytest
+Tunnel ID: 7d042da8-f061-4d5c-9616-b6936e925d79
+Hostname: rubytest.cjp-demo.online
+Local service: http://localhost:3010
+Config: %USERPROFILE%\.cloudflared\refactorsim-rubytest.yml
+```
+
+If the tunnel process is stopped, restart it with:
+
+```powershell
+cloudflared --config $env:USERPROFILE\.cloudflared\refactorsim-rubytest.yml tunnel run refactorsim-rubytest
+```
+
 ## What V1 Includes
 
 - 10 fixed Ruby refactoring challenges.
