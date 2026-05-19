@@ -20,13 +20,13 @@ export const CHALLENGES: Challenge[] = [
     fileName: "rental_cart.rb",
     specFileName: "rental_cart_spec.rb",
     businessRules: [
-      "Regular videos cost 1,000 JPY for the first 2 days, then 300 JPY per extra day.",
-      "New releases cost 400 JPY per day.",
-      "Children videos cost 800 JPY for the first 3 days, then 200 JPY per extra day.",
-      "Campaign mode gives 50% off each new release rental.",
-      "Each rental earns 1 point, plus 1 bonus point for new releases rented for 2+ days.",
-      "Rental days above 30 must raise RentalPeriodError.",
-      "Receipt text and totals must keep the same behavior."
+      "Phim thường tính 1,000 JPY cho 2 ngày đầu, sau đó cộng 300 JPY cho mỗi ngày phát sinh.",
+      "Phim mới phát hành tính 400 JPY mỗi ngày.",
+      "Phim thiếu nhi tính 800 JPY cho 3 ngày đầu, sau đó cộng 200 JPY cho mỗi ngày phát sinh.",
+      "Khi bật campaign, mỗi lượt thuê phim mới phát hành được giảm 50%.",
+      "Mỗi lượt thuê được 1 điểm, phim mới phát hành thuê từ 2 ngày trở lên được cộng thêm 1 điểm.",
+      "Số ngày thuê lớn hơn 30 phải raise RentalPeriodError.",
+      "Nội dung biên lai và tổng tiền/tổng điểm phải giữ nguyên hành vi cũ."
     ],
     rubric: [
       "Characterize behavior before changing structure.",
@@ -158,12 +158,12 @@ end
     fileName: "checkout_calculator.rb",
     specFileName: "checkout_calculator_spec.rb",
     businessRules: [
-      "Accessory items get 10% off when quantity is 3 or more.",
-      "Electronics items get a flat 15 USD discount when quantity is 2 or more.",
-      "Gold members receive 8% off after item discounts.",
-      "SAVE25 applies after item discounts when the discounted subtotal is at least 100.",
-      "VN tax is 10% on taxable items after prorated item discounts.",
-      "Gift cards reduce the payable total after tax and shipping."
+      "Sản phẩm phụ kiện được giảm 10% khi số lượng từ 3 trở lên.",
+      "Sản phẩm điện tử được giảm cố định 15 USD khi số lượng từ 2 trở lên.",
+      "Khách hàng hạng Gold được giảm 8% sau khi đã áp dụng giảm giá theo từng mặt hàng.",
+      "Mã SAVE25 được áp dụng sau giảm giá mặt hàng nếu subtotal sau giảm giá đạt ít nhất 100.",
+      "Thuế VN là 10% trên các mặt hàng chịu thuế sau khi phân bổ giảm giá mặt hàng theo tỷ lệ.",
+      "Gift card được trừ vào tổng cần thanh toán sau thuế và phí vận chuyển."
     ],
     rubric: [
       "Protect calculation order with examples.",
@@ -294,12 +294,12 @@ end
     fileName: "billing_engine.rb",
     specFileName: "billing_engine_spec.rb",
     businessRules: [
-      "Plans have base fee, seat fee, included seats, and included storage.",
-      "Seats above the included limit are charged at 1.5x the regular seat fee.",
-      "20+ seats receive 10% off seat subtotal; 100+ seats receive 20%.",
-      "Annual billing gives 15% off gross subtotal before referral credit.",
-      "Referral credit is capped so invoice cannot go below zero before tax.",
-      "Tax is based on the region after discounts and credits."
+      "Mỗi gói có phí nền, phí theo seat, số seat bao gồm sẵn và dung lượng lưu trữ bao gồm sẵn.",
+      "Seat vượt quá giới hạn bao gồm sẵn bị tính phí bằng 1.5 lần phí seat thông thường.",
+      "Từ 20 seat được giảm 10% subtotal của seat; từ 100 seat được giảm 20%.",
+      "Thanh toán theo năm được giảm 15% trên gross subtotal trước khi áp dụng referral credit.",
+      "Referral credit bị giới hạn để hóa đơn trước thuế không bị âm.",
+      "Thuế được tính theo region sau khi đã áp dụng giảm giá và credit."
     ],
     rubric: [
       "Make plan, usage, discount, and tax logic easier to reason about.",
@@ -413,12 +413,12 @@ end
     fileName: "insurance_premium_engine.rb",
     specFileName: "insurance_premium_engine_spec.rb",
     businessRules: [
-      "Each policy is priced from insured value, plan rate, risk level, age, and add-ons.",
-      "Portfolio discount applies when a customer has 3 or more policies.",
-      "No-claim discount applies after the portfolio discount.",
-      "Employee benefit is a flat discount after percentage discounts.",
-      "Tax rate depends on customer region.",
-      "Final result must keep audit, warning, and pricing keys stable."
+      "Mỗi hợp đồng được tính phí dựa trên giá trị bảo hiểm, rate của plan, mức rủi ro, tuổi và các add-on.",
+      "Giảm giá portfolio được áp dụng khi khách hàng có từ 3 hợp đồng trở lên.",
+      "Giảm giá no-claim được áp dụng sau giảm giá portfolio.",
+      "Ưu đãi nhân viên là khoản giảm cố định sau các giảm giá theo phần trăm.",
+      "Thuế suất phụ thuộc vào region của khách hàng.",
+      "Kết quả cuối cùng phải giữ ổn định các key audit, warning và pricing."
     ],
     rubric: [
       "Make rate tables and discount order explicit.",
@@ -535,12 +535,12 @@ end
     fileName: "payroll_adjustment_engine.rb",
     specFileName: "payroll_adjustment_engine_spec.rb",
     businessRules: [
-      "Hourly employees receive overtime after 40 hours at 1.5x.",
-      "Managers receive a fixed responsibility allowance.",
-      "Weekend shifts add a fixed allowance per shift.",
-      "December payroll adds a 3% holiday allowance to gross pay.",
-      "Contractors are excluded from benefit deductions.",
-      "Regional income tax is calculated after the holiday allowance."
+      "Nhân viên tính theo giờ được tính overtime sau 40 giờ với hệ số 1.5 lần.",
+      "Manager nhận thêm một khoản phụ cấp trách nhiệm cố định.",
+      "Ca làm cuối tuần được cộng phụ cấp cố định cho từng ca.",
+      "Bảng lương tháng 12 cộng thêm phụ cấp holiday 3% vào gross pay.",
+      "Contractor không bị trừ benefit deductions.",
+      "Thuế thu nhập theo region được tính sau khi cộng phụ cấp holiday."
     ],
     rubric: [
       "Extract employee gross pay from payroll-level deductions.",
@@ -636,12 +636,12 @@ end
     fileName: "airline_fare_engine.rb",
     specFileName: "airline_fare_engine_spec.rb",
     businessRules: [
-      "Each leg combines base fare, distance charge, cabin multiplier, peak multiplier, and international surcharge.",
-      "One bag per passenger is free; extra bags are charged.",
-      "Seat selection is charged per passenger.",
-      "Loyalty discount applies before promo code.",
-      "International airport fees are charged per passenger per international leg.",
-      "Tax applies after loyalty and promo discounts but before airport fees."
+      "Mỗi chặng bay kết hợp base fare, phí theo khoảng cách, hệ số cabin, hệ số mùa cao điểm và phụ phí quốc tế.",
+      "Mỗi hành khách được miễn phí 1 hành lý; hành lý vượt quá sẽ bị tính phí.",
+      "Phí chọn ghế được tính theo từng hành khách.",
+      "Giảm giá loyalty được áp dụng trước promo code.",
+      "Phí sân bay quốc tế được tính theo từng hành khách cho từng chặng quốc tế.",
+      "Thuế được tính sau giảm giá loyalty và promo, nhưng trước phí sân bay."
     ],
     rubric: [
       "Make fare leg pricing testable in isolation.",
@@ -750,12 +750,12 @@ end
     fileName: "property_commission_engine.rb",
     specFileName: "property_commission_engine_spec.rb",
     businessRules: [
-      "Residential commission is tiered: 3% for the first 500k, 2% above that.",
-      "Commercial and land deals use flat commission rates.",
-      "Luxury residential deals above 1M receive an additional 0.2%.",
-      "Co-broker deals split gross commission before agent split.",
-      "Referral fee is 15% of the agent commission.",
-      "Company tax is calculated after marketing spend."
+      "Hoa hồng bất động sản nhà ở tính theo bậc: 3% cho 500k đầu tiên, phần vượt trên đó tính 2%.",
+      "Giao dịch commercial và land dùng tỷ lệ hoa hồng cố định.",
+      "Giao dịch residential hạng luxury trên 1M được cộng thêm 0.2%.",
+      "Giao dịch co-broker chia gross commission trước khi chia phần cho agent.",
+      "Referral fee bằng 15% agent commission.",
+      "Thuế của công ty được tính sau khi trừ marketing spend."
     ],
     rubric: [
       "Extract commission rate and split concepts.",
@@ -846,12 +846,12 @@ end
     fileName: "warehouse_fulfillment_engine.rb",
     specFileName: "warehouse_fulfillment_engine_spec.rb",
     businessRules: [
-      "Picking, packing, weight, cold-chain, insurance, SLA, and distance fees are combined.",
-      "Fragile items increase packing fees.",
-      "Cold-chain items add per-unit cold handling fees.",
-      "Monthly volume discount applies only to handling fees.",
-      "Priority client discount applies after the volume discount.",
-      "Tax is calculated after all discounts."
+      "Tổng phí gồm picking, packing, phí theo trọng lượng, cold-chain, bảo hiểm, SLA và phí theo khoảng cách.",
+      "Hàng dễ vỡ làm tăng phí packing.",
+      "Hàng cold-chain cộng thêm phí xử lý lạnh theo từng unit.",
+      "Giảm giá theo volume tháng chỉ áp dụng trên handling fees.",
+      "Giảm giá priority client được áp dụng sau giảm giá volume.",
+      "Thuế được tính sau khi đã áp dụng toàn bộ giảm giá."
     ],
     rubric: [
       "Separate item handling from shipment-level fees.",
@@ -959,12 +959,12 @@ end
     fileName: "hospital_invoice_engine.rb",
     specFileName: "hospital_invoice_engine_spec.rb",
     businessRules: [
-      "Procedures combine base price, unit count, emergency uplift, and doctor grade uplift.",
-      "In-network patients receive a 10% network discount on gross charges.",
-      "Insurance plan determines covered percentage after network discount.",
-      "Remaining deductible is added to patient responsibility.",
-      "Medication tax is charged separately.",
-      "Max out-of-pocket cap limits patient responsibility before medication tax."
+      "Mỗi procedure kết hợp base price, số unit, phụ phí emergency và phụ phí theo doctor grade.",
+      "Bệnh nhân in-network được giảm 10% network discount trên gross charges.",
+      "Gói bảo hiểm quyết định tỷ lệ được chi trả sau network discount.",
+      "Khoản deductible còn lại được cộng vào phần bệnh nhân phải trả.",
+      "Thuế thuốc được tính riêng.",
+      "Max out-of-pocket cap giới hạn phần bệnh nhân phải trả trước khi cộng thuế thuốc."
     ],
     rubric: [
       "Separate clinical line items from payer responsibility.",
@@ -1058,12 +1058,12 @@ end
     fileName: "loan_payoff_engine.rb",
     specFileName: "loan_payoff_engine_spec.rb",
     businessRules: [
-      "Remaining principal is calculated from scheduled payments minus accrued simple interest.",
-      "Late fee is capped per loan.",
-      "High-score borrowers receive early payoff discount when more than 12 months remain.",
-      "Refinance mode adds a fixed processing fee.",
-      "Service tax applies to late and processing fees only.",
-      "Negative remaining principal is floored at zero."
+      "Remaining principal được tính từ scheduled payments sau khi trừ accrued simple interest.",
+      "Late fee có mức trần riêng cho từng khoản vay.",
+      "Borrower có điểm tín dụng cao được giảm giá early payoff khi còn hơn 12 tháng.",
+      "Chế độ refinance cộng thêm một khoản processing fee cố định.",
+      "Service tax chỉ áp dụng cho late fee và processing fee.",
+      "Remaining principal âm phải được đưa về 0."
     ],
     rubric: [
       "Isolate loan-level payoff math from borrower-level fees.",
