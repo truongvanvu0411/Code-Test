@@ -242,7 +242,17 @@ async function findSubmissionDirs() {
 async function readSubmissionReport(submissionId: string) {
   if (!/^[A-Za-z0-9._-]+$/.test(submissionId)) return null;
   try {
-    return JSON.parse(await fs.readFile(path.join(SUBMISSIONS_DIR, submissionId, "report.json"), "utf8"));
+    const report = JSON.parse(await fs.readFile(path.join(SUBMISSIONS_DIR, submissionId, "report.json"), "utf8"));
+    const challenge = CHALLENGES.find((item) => item.id === report.challenge?.id);
+    if (!challenge) return report;
+
+    return {
+      ...report,
+      challenge: {
+        ...report.challenge,
+        ...publicChallenge(challenge)
+      }
+    };
   } catch (error: any) {
     if (error?.code === "ENOENT") return null;
     throw error;
