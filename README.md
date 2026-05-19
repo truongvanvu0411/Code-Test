@@ -83,10 +83,26 @@ cloudflared --config $env:USERPROFILE\.cloudflared\refactorsim-rubytest.yml tunn
 ## What V1 Includes
 
 - 10 fixed Ruby refactoring challenges.
+- Login for admin and candidate users.
+- Admin user management for creating and disabling users.
 - Editable implementation and visible RSpec tabs.
 - Hidden RSpec checks executed in the Ruby runner container.
-- Local submission artifacts under `submissions/`.
+- Screen recording capture using the browser's display recording permission.
+- Local user/session data under `data/`.
+- Local submission artifacts, code, specs, reports, and recordings under `submissions/`.
 - AI usage self-report for reviewer comparison with the recorded video.
+
+## User Flow
+
+On the first run, the app shows a first-admin setup screen. After creating the admin:
+
+1. Log in as admin.
+2. Create candidate users from the Admin screen.
+3. Candidate logs in and starts a simulation.
+4. Candidate starts screen recording, runs specs, refactors, fills submit notes, and saves.
+5. Admin opens the Admin screen to download report, code, spec, and recording.
+
+All auth is local to this deployment. Do not commit `data/` or `submissions/`.
 
 ## Local Node Mode
 
