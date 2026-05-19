@@ -13,13 +13,16 @@ import {
   FileCode,
   History,
   LogOut,
+  Maximize2,
   MonitorDot,
   Play,
   Save,
+  Search,
   ShieldCheck,
   Square,
   Terminal,
   Timer,
+  X,
   UserPlus,
   Users
 } from "lucide-react";
@@ -153,6 +156,13 @@ export default function App() {
   const [adminUsers, setAdminUsers] = useState<User[]>([]);
   const [adminSubmissions, setAdminSubmissions] = useState<SubmissionReport[]>([]);
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "candidate" as Role });
+  const [adminMenu, setAdminMenu] = useState<"tests" | "users">("tests");
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState("");
+  const [testSearch, setTestSearch] = useState("");
+  const [challengeFilter, setChallengeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [recordingFilter, setRecordingFilter] = useState("all");
+  const [videoExpanded, setVideoExpanded] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -221,6 +231,44 @@ export default function App() {
     if (recordingBlob) score += 5;
     return Math.min(score, 100);
   }, [nextSteps, recordingBlob, runHistory, summary, verificationNotes]);
+
+  const challengeOptions = useMemo(() => {
+    const options = new Map<string, string>();
+    adminSubmissions.forEach((submission) => {
+      options.set(submission.challenge.id, submission.challenge.title);
+    });
+    return Array.from(options.entries());
+  }, [adminSubmissions]);
+
+  const filteredSubmissions = useMemo(() => {
+    const query = testSearch.trim().toLowerCase();
+    return adminSubmissions.filter((submission) => {
+      const searchable = [
+        submission.candidateName,
+        submission.user?.email,
+        submission.challenge.title,
+        submission.challenge.domain,
+        submission.summary,
+        submission.submissionId
+      ].join(" ").toLowerCase();
+      const matchesQuery = !query || searchable.includes(query);
+      const matchesChallenge = challengeFilter === "all" || submission.challenge.id === challengeFilter;
+      const passed = submission.autoSignals.visiblePassed && submission.autoSignals.hiddenPassed;
+      const matchesStatus = statusFilter === "all" || (statusFilter === "passed" ? passed : !passed);
+      const matchesRecording =
+        recordingFilter === "all" ||
+        (recordingFilter === "with" ? Boolean(submission.recording) : !submission.recording);
+      return matchesQuery && matchesChallenge && matchesStatus && matchesRecording;
+    });
+  }, [adminSubmissions, challengeFilter, recordingFilter, statusFilter, testSearch]);
+
+  const selectedSubmission = useMemo(() => {
+    return (
+      adminSubmissions.find((submission) => submission.submissionId === selectedSubmissionId) ||
+      filteredSubmissions[0] ||
+      null
+    );
+  }, [adminSubmissions, filteredSubmissions, selectedSubmissionId]);
 
   function formatTime(seconds: number) {
     const mins = Math.floor(seconds / 60);
@@ -465,6 +513,7 @@ export default function App() {
     ]);
     setAdminUsers(users);
     setAdminSubmissions(submissions);
+    setSelectedSubmissionId((current) => current || submissions[0]?.submissionId || "");
   }
 
   async function createUser(event: React.FormEvent<HTMLFormElement>) {
@@ -524,86 +573,169 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-100 text-slate-950">
         <TopBar user={user} onLogout={logout} onAdmin={() => setState("admin")} onCandidate={() => setState("welcome")} />
-        <main className="max-w-7xl mx-auto p-6 space-y-6">
-          <section className="grid grid-cols-[360px_1fr] gap-6">
-            <div className="bg-white border border-slate-200 p-5">
-              <h2 className="font-bold flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create user</h2>
-              <form onSubmit={createUser} className="mt-4 space-y-3">
-                <AdminInput label="Name" value={newUser.name} onChange={(value) => setNewUser({ ...newUser, name: value })} />
-                <AdminInput label="Email" value={newUser.email} onChange={(value) => setNewUser({ ...newUser, email: value })} />
-                <AdminInput label="Password" type="password" value={newUser.password} onChange={(value) => setNewUser({ ...newUser, password: value })} />
-                <select
-                  value={newUser.role}
-                  onChange={(event) => setNewUser({ ...newUser, role: event.target.value as Role })}
-                  className="w-full border border-slate-300 px-3 py-2"
-                >
-                  <option value="candidate">Candidate</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <button className="w-full bg-slate-950 px-4 py-2 font-bold text-white">Create</button>
-              </form>
+        <main className="grid min-h-[calc(100vh-56px)] grid-cols-[248px_1fr]">
+          <aside className="border-r border-slate-200 bg-white px-4 py-5">
+            <div className="mb-6">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Admin</div>
+              <div className="mt-1 text-lg font-bold text-slate-950">Review Console</div>
             </div>
+            <nav className="space-y-1">
+              <AdminNavButton
+                active={adminMenu === "tests"}
+                icon={<FileCode className="w-4 h-4" />}
+                label="List bài test"
+                count={adminSubmissions.length}
+                onClick={() => setAdminMenu("tests")}
+              />
+              <AdminNavButton
+                active={adminMenu === "users"}
+                icon={<Users className="w-4 h-4" />}
+                label="Quản lý user"
+                count={adminUsers.length}
+                onClick={() => setAdminMenu("users")}
+              />
+            </nav>
+          </aside>
 
-            <div className="bg-white border border-slate-200 p-5">
-              <h2 className="font-bold flex items-center gap-2"><Users className="w-4 h-4" /> Users</h2>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-left text-slate-500">
-                    <tr>
-                      <th className="py-2">Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {adminUsers.map((item) => (
-                      <tr key={item.id} className="border-t border-slate-100">
-                        <td className="py-2">{item.name}</td>
-                        <td>{item.email}</td>
-                        <td>{item.role}</td>
-                        <td>{item.active ? "active" : "disabled"}</td>
-                        <td className="text-right">
-                          <button onClick={() => toggleUser(item)} className="border border-slate-300 px-3 py-1 text-xs">
-                            {item.active ? "Disable" : "Enable"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-white border border-slate-200 p-5">
-            <h2 className="font-bold">Submissions</h2>
-            <div className="mt-4 grid gap-3">
-              {adminSubmissions.length === 0 && <p className="text-sm text-slate-500">No submissions yet.</p>}
-              {adminSubmissions.map((submission) => (
-                <div key={submission.submissionId} className="border border-slate-200 p-4 grid grid-cols-[1fr_auto] gap-4">
+          {adminMenu === "tests" ? (
+            <section className="grid min-h-0 grid-cols-[390px_1fr]">
+              <div className="border-r border-slate-200 bg-slate-50 p-5">
+                <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold">{submission.candidateName} / {submission.challenge.title}</div>
-                    <div className="text-xs text-slate-500 mt-1">{new Date(submission.submittedAt).toLocaleString()} / runs {submission.runHistory.length}</div>
-                    <div className="mt-2 text-sm text-slate-600 line-clamp-2">{submission.summary}</div>
-                    <div className="mt-2 flex gap-2 text-xs">
-                      <Badge ok={submission.autoSignals.visiblePassed} label="Visible" />
-                      <Badge ok={submission.autoSignals.hiddenPassed} label="Hidden" />
-                      <Badge ok={Boolean(submission.recording)} label="Recording" />
-                    </div>
+                    <h1 className="text-xl font-bold">List bài test</h1>
+                    <p className="text-sm text-slate-500">{filteredSubmissions.length} / {adminSubmissions.length} submissions</p>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <ArtifactLink id={submission.submissionId} artifact="report" label="Report" />
-                    <ArtifactLink id={submission.submissionId} artifact="code" label="Code" />
-                    <ArtifactLink id={submission.submissionId} artifact="spec" label="Spec" />
-                    {submission.recording && <ArtifactLink id={submission.submissionId} artifact="recording" label="Recording" />}
+                  <button onClick={loadAdminData} className="border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">Refresh</button>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  <label className="flex items-center gap-2 border border-slate-300 bg-white px-3 py-2">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <input
+                      value={testSearch}
+                      onChange={(event) => setTestSearch(event.target.value)}
+                      placeholder="Search candidate, bài test, summary..."
+                      className="w-full bg-transparent text-sm outline-none"
+                    />
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select value={challengeFilter} onChange={(event) => setChallengeFilter(event.target.value)} className="border border-slate-300 bg-white px-2 py-2 text-xs">
+                      <option value="all">All tests</option>
+                      {challengeOptions.map(([id, title]) => <option key={id} value={id}>{title}</option>)}
+                    </select>
+                    <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="border border-slate-300 bg-white px-2 py-2 text-xs">
+                      <option value="all">All status</option>
+                      <option value="passed">Passed</option>
+                      <option value="failed">Needs review</option>
+                    </select>
+                    <select value={recordingFilter} onChange={(event) => setRecordingFilter(event.target.value)} className="border border-slate-300 bg-white px-2 py-2 text-xs">
+                      <option value="all">All video</option>
+                      <option value="with">Has video</option>
+                      <option value="without">No video</option>
+                    </select>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+
+                <div className="mt-4 h-[calc(100vh-250px)] space-y-2 overflow-y-auto pr-1">
+                  {filteredSubmissions.length === 0 && <div className="border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">No matching submissions.</div>}
+                  {filteredSubmissions.map((submission) => {
+                    const passed = submission.autoSignals.visiblePassed && submission.autoSignals.hiddenPassed;
+                    const active = selectedSubmission?.submissionId === submission.submissionId;
+                    return (
+                      <button
+                        key={submission.submissionId}
+                        onClick={() => setSelectedSubmissionId(submission.submissionId)}
+                        className={cn(
+                          "w-full border p-3 text-left transition",
+                          active ? "border-blue-500 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-semibold leading-tight">{submission.candidateName}</div>
+                            <div className="mt-1 text-xs text-slate-500">{submission.challenge.title}</div>
+                          </div>
+                          <span className={cn("px-2 py-1 text-[10px] font-bold", passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
+                            {passed ? "PASS" : "REVIEW"}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                          <span>{new Date(submission.submittedAt).toLocaleDateString()}</span>
+                          <span>{submission.runHistory.length} runs / {submission.recording ? "video" : "no video"}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="min-w-0 overflow-y-auto p-6">
+                {selectedSubmission ? (
+                  <SubmissionDetail submission={selectedSubmission} onExpandVideo={() => setVideoExpanded(true)} />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-500">Select a submission to review.</div>
+                )}
+              </div>
+            </section>
+          ) : (
+            <section className="p-6">
+              <div className="grid grid-cols-[360px_1fr] gap-6">
+                <div className="bg-white border border-slate-200 p-5">
+                  <h2 className="font-bold flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create user</h2>
+                  <form onSubmit={createUser} className="mt-4 space-y-3">
+                    <AdminInput label="Name" value={newUser.name} onChange={(value) => setNewUser({ ...newUser, name: value })} />
+                    <AdminInput label="Email" value={newUser.email} onChange={(value) => setNewUser({ ...newUser, email: value })} />
+                    <AdminInput label="Password" type="password" value={newUser.password} onChange={(value) => setNewUser({ ...newUser, password: value })} />
+                    <select
+                      value={newUser.role}
+                      onChange={(event) => setNewUser({ ...newUser, role: event.target.value as Role })}
+                      className="w-full border border-slate-300 px-3 py-2"
+                    >
+                      <option value="candidate">Candidate</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <button className="w-full bg-slate-950 px-4 py-2 font-bold text-white">Create</button>
+                  </form>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-5">
+                  <h2 className="font-bold flex items-center gap-2"><Users className="w-4 h-4" /> Users</h2>
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="text-left text-slate-500">
+                        <tr>
+                          <th className="py-2">Name</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Status</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminUsers.map((item) => (
+                          <tr key={item.id} className="border-t border-slate-100">
+                            <td className="py-2">{item.name}</td>
+                            <td>{item.email}</td>
+                            <td>{item.role}</td>
+                            <td>{item.active ? "active" : "disabled"}</td>
+                            <td className="text-right">
+                              <button onClick={() => toggleUser(item)} className="border border-slate-300 px-3 py-1 text-xs">
+                                {item.active ? "Disable" : "Enable"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
         </main>
+        {videoExpanded && selectedSubmission?.recording && (
+          <VideoModal submission={selectedSubmission} onClose={() => setVideoExpanded(false)} />
+        )}
       </div>
     );
   }
@@ -909,6 +1041,169 @@ function TopBar({
         <button onClick={onLogout} className="bg-slate-800 px-3 py-1 flex items-center gap-1"><LogOut className="w-3.5 h-3.5" /> Logout</button>
       </div>
     </header>
+  );
+}
+
+function AdminNavButton({
+  active,
+  icon,
+  label,
+  count,
+  onClick
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  count: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-center justify-between border px-3 py-2 text-sm font-semibold",
+        active ? "border-slate-950 bg-slate-950 text-white" : "border-transparent text-slate-600 hover:bg-slate-100"
+      )}
+    >
+      <span className="flex items-center gap-2">{icon}{label}</span>
+      <span className={cn("text-xs", active ? "text-slate-300" : "text-slate-400")}>{count}</span>
+    </button>
+  );
+}
+
+function SubmissionDetail({ submission, onExpandVideo }: { submission: SubmissionReport; onExpandVideo: () => void }) {
+  const passed = submission.autoSignals.visiblePassed && submission.autoSignals.hiddenPassed;
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm text-slate-500">{submission.challenge.domain}</div>
+          <h1 className="mt-1 text-2xl font-bold">{submission.challenge.title}</h1>
+          <div className="mt-2 text-sm text-slate-500">
+            {submission.candidateName} / {submission.user?.email} / {new Date(submission.submittedAt).toLocaleString()}
+          </div>
+        </div>
+        <div className={cn("px-3 py-2 text-sm font-bold", passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
+          {passed ? "Passed" : "Needs review"}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[minmax(0,1fr)_420px] gap-5">
+        <div className="space-y-4">
+          <div className="grid grid-cols-4 gap-3">
+            <ReviewMetric label="Visible" value={submission.autoSignals.visiblePassed ? "Pass" : "Fail"} />
+            <ReviewMetric label="Hidden" value={submission.autoSignals.hiddenPassed ? "Pass" : "Fail"} />
+            <ReviewMetric label="Runs" value={String(submission.runHistory.length)} />
+            <ReviewMetric label="Recording" value={submission.recording ? "Yes" : "No"} />
+          </div>
+
+          <ReviewSection title="Summary" text={submission.summary} />
+          <ReviewSection title="Verification" text={submission.verificationNotes} />
+          <ReviewSection title="Next Refactor Plan" text={submission.nextSteps} />
+          <ReviewSection title="AI Self-report" text={submission.aiSelfReport} />
+
+          <section className="border border-slate-200 bg-white p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-bold">Run history</h2>
+              <div className="flex gap-2">
+                <ArtifactLink id={submission.submissionId} artifact="report" label="Report" />
+                <ArtifactLink id={submission.submissionId} artifact="code" label="Code" />
+                <ArtifactLink id={submission.submissionId} artifact="spec" label="Spec" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              {submission.runHistory.length === 0 && <div className="text-sm text-slate-500">No runs captured.</div>}
+              {submission.runHistory.map((run, index) => (
+                <div key={`${run.at}-${index}`} className="grid grid-cols-[80px_1fr_120px] border border-slate-100 px-3 py-2 text-sm">
+                  <span className="font-semibold">Run {index + 1}</span>
+                  <span className="text-slate-500">{new Date(run.at).toLocaleString()}</span>
+                  <span className={run.status === "passed" ? "text-emerald-600" : "text-amber-600"}>{run.status} / {run.durationMs}ms</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside className="space-y-4">
+          <section className="border border-slate-200 bg-white p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-bold">Recording</h2>
+              {submission.recording && (
+                <button onClick={onExpandVideo} className="flex items-center gap-1 border border-slate-300 px-3 py-1 text-xs font-semibold">
+                  <Maximize2 className="h-3.5 w-3.5" /> Expand
+                </button>
+              )}
+            </div>
+            {submission.recording ? (
+              <video
+                src={`/api/admin/submissions/${submission.submissionId}/recording`}
+                controls
+                className="aspect-video w-full bg-slate-950"
+              />
+            ) : (
+              <div className="flex aspect-video items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
+                No recording uploaded
+              </div>
+            )}
+            {submission.recording && (
+              <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                <span>{Math.round(submission.recording.size / 1024 / 1024)} MB</span>
+                <ArtifactLink id={submission.submissionId} artifact="recording" label="Download" />
+              </div>
+            )}
+          </section>
+
+          <section className="border border-slate-200 bg-white p-4">
+            <h2 className="font-bold">Business rules</h2>
+            <ul className="mt-3 space-y-2 text-sm text-slate-600">
+              {submission.challenge.businessRules.map((rule) => (
+                <li key={rule} className="border-l border-slate-200 pl-3">{rule}</li>
+              ))}
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function VideoModal({ submission, onClose }: { submission: SubmissionReport; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950/90 p-6">
+      <div className="mb-4 flex items-center justify-between text-white">
+        <div>
+          <div className="text-sm text-slate-400">{submission.candidateName}</div>
+          <div className="text-xl font-bold">{submission.challenge.title}</div>
+        </div>
+        <button onClick={onClose} className="flex items-center gap-2 border border-white/20 px-3 py-2 text-sm">
+          <X className="h-4 w-4" /> Close
+        </button>
+      </div>
+      <video
+        src={`/api/admin/submissions/${submission.submissionId}/recording`}
+        controls
+        autoPlay
+        className="h-[calc(100vh-96px)] w-full bg-black object-contain"
+      />
+    </div>
+  );
+}
+
+function ReviewMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-slate-200 bg-white p-3">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+      <div className="mt-1 font-bold">{value}</div>
+    </div>
+  );
+}
+
+function ReviewSection({ title, text }: { title: string; text: string }) {
+  return (
+    <section className="border border-slate-200 bg-white p-4">
+      <h2 className="font-bold">{title}</h2>
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{text || "No content."}</p>
+    </section>
   );
 }
 

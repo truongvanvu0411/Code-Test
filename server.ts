@@ -564,6 +564,19 @@ async function startServer() {
     res.json(report);
   }));
 
+  app.get("/api/admin/submissions/:id/recording", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+    const report = await readSubmissionReport(req.params.id);
+    if (!report || !report.recording) {
+      res.status(404).json({ error: "Recording not found" });
+      return;
+    }
+
+    const filePath = path.join(SUBMISSIONS_DIR, req.params.id, "recording.webm");
+    res.setHeader("Content-Type", "video/webm");
+    res.setHeader("Content-Disposition", "inline");
+    res.sendFile(filePath);
+  }));
+
   app.get("/api/admin/submissions/:id/artifact/:artifact", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
     const report = await readSubmissionReport(req.params.id);
     if (!report) {
