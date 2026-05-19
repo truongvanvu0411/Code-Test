@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Square,
   Terminal,
+  Trash2,
   X,
   UserPlus,
   Users
@@ -539,6 +540,18 @@ export default function App() {
     await loadAdminData();
   }
 
+  async function deleteSubmission(target: SubmissionReport) {
+    const confirmed = window.confirm(
+      `Delete submission "${target.challenge.title}" from ${target.candidateName}? This will remove the report, code, spec, and recording.`
+    );
+    if (!confirmed) return;
+
+    await api(`/api/admin/submissions/${target.submissionId}`, { method: "DELETE" });
+    setSelectedSubmissionId("");
+    setVideoExpanded(false);
+    await loadAdminData();
+  }
+
   useEffect(() => {
     if (state === "admin" && user?.role === "admin") {
       loadAdminData().catch((error) => setAuthError(error instanceof Error ? error.message : "Could not load admin data"));
@@ -676,7 +689,11 @@ export default function App() {
 
               <div className="min-w-0 flex-1 overflow-y-auto p-6">
                 {selectedSubmission ? (
-                  <SubmissionDetail submission={selectedSubmission} onExpandVideo={() => setVideoExpanded(true)} />
+                  <SubmissionDetail
+                    submission={selectedSubmission}
+                    onExpandVideo={() => setVideoExpanded(true)}
+                    onDelete={deleteSubmission}
+                  />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-500">Select a submission to review.</div>
                 )}
@@ -1057,7 +1074,15 @@ function AdminNavButton({
   );
 }
 
-function SubmissionDetail({ submission, onExpandVideo }: { submission: SubmissionReport; onExpandVideo: () => void }) {
+function SubmissionDetail({
+  submission,
+  onExpandVideo,
+  onDelete
+}: {
+  submission: SubmissionReport;
+  onExpandVideo: () => void;
+  onDelete: (submission: SubmissionReport) => void;
+}) {
   const passed = submission.autoSignals.visiblePassed && submission.autoSignals.hiddenPassed;
   return (
     <div className="space-y-5">
@@ -1069,8 +1094,16 @@ function SubmissionDetail({ submission, onExpandVideo }: { submission: Submissio
             {submission.candidateName} / {submission.user?.email} / {new Date(submission.submittedAt).toLocaleString()}
           </div>
         </div>
-        <div className={cn("px-3 py-2 text-sm font-bold", passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
-          {passed ? "Passed" : "Needs review"}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onDelete(submission)}
+            className="flex items-center gap-2 border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-100"
+          >
+            <Trash2 className="h-4 w-4" /> Delete
+          </button>
+          <div className={cn("px-3 py-2 text-sm font-bold", passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
+            {passed ? "Passed" : "Needs review"}
+          </div>
         </div>
       </div>
 

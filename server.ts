@@ -564,6 +564,24 @@ async function startServer() {
     res.json(report);
   }));
 
+  app.delete("/api/admin/submissions/:id", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+    const report = await readSubmissionReport(req.params.id);
+    if (!report) {
+      res.status(404).json({ error: "Submission not found" });
+      return;
+    }
+
+    const root = path.resolve(SUBMISSIONS_DIR);
+    const target = path.resolve(SUBMISSIONS_DIR, req.params.id);
+    if (!target.startsWith(root + path.sep)) {
+      res.status(400).json({ error: "Invalid submission path" });
+      return;
+    }
+
+    await fs.rm(target, { recursive: true, force: true });
+    res.json({ ok: true });
+  }));
+
   app.get("/api/admin/submissions/:id/recording", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
     const report = await readSubmissionReport(req.params.id);
     if (!report || !report.recording) {
