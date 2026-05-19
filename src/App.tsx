@@ -573,8 +573,8 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-100 text-slate-950">
         <TopBar user={user} onLogout={logout} onAdmin={() => setState("admin")} onCandidate={() => setState("welcome")} />
-        <main className="grid min-h-[calc(100vh-56px)] grid-cols-[248px_1fr]">
-          <aside className="border-r border-slate-200 bg-white px-4 py-5">
+        <main className="flex h-[calc(100vh-56px)] overflow-hidden bg-slate-100">
+          <aside className="w-64 shrink-0 border-r border-slate-200 bg-white px-4 py-5">
             <div className="mb-6">
               <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Admin</div>
               <div className="mt-1 text-lg font-bold text-slate-950">Review Console</div>
@@ -598,8 +598,8 @@ export default function App() {
           </aside>
 
           {adminMenu === "tests" ? (
-            <section className="grid min-h-0 grid-cols-[390px_1fr]">
-              <div className="border-r border-slate-200 bg-slate-50 p-5">
+            <section className="flex min-w-0 flex-1 overflow-hidden">
+              <div className="w-96 shrink-0 border-r border-slate-200 bg-slate-50 p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-xl font-bold">List bài test</h1>
@@ -636,7 +636,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="mt-4 h-[calc(100vh-250px)] space-y-2 overflow-y-auto pr-1">
+                <div className="mt-4 h-[calc(100vh-276px)] space-y-2 overflow-y-auto pr-1">
                   {filteredSubmissions.length === 0 && <div className="border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">No matching submissions.</div>}
                   {filteredSubmissions.map((submission) => {
                     const passed = submission.autoSignals.visiblePassed && submission.autoSignals.hiddenPassed;
@@ -669,7 +669,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="min-w-0 overflow-y-auto p-6">
+              <div className="min-w-0 flex-1 overflow-y-auto p-6">
                 {selectedSubmission ? (
                   <SubmissionDetail submission={selectedSubmission} onExpandVideo={() => setVideoExpanded(true)} />
                 ) : (
@@ -678,7 +678,7 @@ export default function App() {
               </div>
             </section>
           ) : (
-            <section className="p-6">
+            <section className="min-w-0 flex-1 overflow-y-auto p-6">
               <div className="grid grid-cols-[360px_1fr] gap-6">
                 <div className="bg-white border border-slate-200 p-5">
                   <h2 className="font-bold flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create user</h2>
@@ -1088,8 +1088,8 @@ function SubmissionDetail({ submission, onExpandVideo }: { submission: Submissio
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_420px] gap-5">
-        <div className="space-y-4">
+      <div className="flex items-start gap-5">
+        <div className="min-w-0 flex-1 space-y-4">
           <div className="grid grid-cols-4 gap-3">
             <ReviewMetric label="Visible" value={submission.autoSignals.visiblePassed ? "Pass" : "Fail"} />
             <ReviewMetric label="Hidden" value={submission.autoSignals.hiddenPassed ? "Pass" : "Fail"} />
@@ -1124,7 +1124,7 @@ function SubmissionDetail({ submission, onExpandVideo }: { submission: Submissio
           </section>
         </div>
 
-        <aside className="space-y-4">
+        <aside className="w-96 shrink-0 space-y-4">
           <section className="border border-slate-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-bold">Recording</h2>
