@@ -17,6 +17,16 @@ services:
       ruby-runner:
         condition: service_healthy
 
+  cloudflared:
+    image: cloudflare/cloudflared:2025.8.1
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TUNNEL_TOKEN:-}
+    profiles:
+      - tunnel
+    depends_on:
+      web:
+        condition: service_started
+    restart: unless-stopped
+
   ruby-runner:
     build:
       context: ./runner
