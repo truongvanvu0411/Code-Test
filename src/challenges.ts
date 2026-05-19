@@ -16,7 +16,7 @@ export const CHALLENGES: Challenge[] = [
     id: "rental_cart",
     title: "RentalCart Refactoring",
     domain: "Video rental checkout",
-    durationMinutes: 40,
+    durationMinutes: 30,
     fileName: "rental_cart.rb",
     specFileName: "rental_cart_spec.rb",
     businessRules: [
@@ -154,7 +154,7 @@ end
     id: "checkout_calculator",
     title: "CheckoutCalculator Refactoring",
     domain: "Retail checkout discounts and tax",
-    durationMinutes: 40,
+    durationMinutes: 30,
     fileName: "checkout_calculator.rb",
     specFileName: "checkout_calculator_spec.rb",
     businessRules: [
@@ -290,7 +290,7 @@ end
     id: "saas_billing",
     title: "BillingEngine Refactoring",
     domain: "SaaS subscription invoice",
-    durationMinutes: 40,
+    durationMinutes: 30,
     fileName: "billing_engine.rb",
     specFileName: "billing_engine_spec.rb",
     businessRules: [
@@ -409,7 +409,7 @@ end
     id: "insurance_premium",
     title: "InsurancePremiumEngine Refactoring",
     domain: "Insurance policy pricing",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "insurance_premium_engine.rb",
     specFileName: "insurance_premium_engine_spec.rb",
     businessRules: [
@@ -531,7 +531,7 @@ end
     id: "payroll_adjustment",
     title: "PayrollAdjustmentEngine Refactoring",
     domain: "Monthly payroll and deductions",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "payroll_adjustment_engine.rb",
     specFileName: "payroll_adjustment_engine_spec.rb",
     businessRules: [
@@ -632,7 +632,7 @@ end
     id: "airline_fare",
     title: "AirlineFareEngine Refactoring",
     domain: "Airline itinerary pricing",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "airline_fare_engine.rb",
     specFileName: "airline_fare_engine_spec.rb",
     businessRules: [
@@ -746,7 +746,7 @@ end
     id: "property_commission",
     title: "PropertyCommissionEngine Refactoring",
     domain: "Real estate commission settlement",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "property_commission_engine.rb",
     specFileName: "property_commission_engine_spec.rb",
     businessRules: [
@@ -842,7 +842,7 @@ end
     id: "warehouse_fulfillment",
     title: "WarehouseFulfillmentEngine Refactoring",
     domain: "3PL fulfillment billing",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "warehouse_fulfillment_engine.rb",
     specFileName: "warehouse_fulfillment_engine_spec.rb",
     businessRules: [
@@ -955,7 +955,7 @@ end
     id: "hospital_invoice",
     title: "HospitalInvoiceEngine Refactoring",
     domain: "Hospital patient invoice",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "hospital_invoice_engine.rb",
     specFileName: "hospital_invoice_engine_spec.rb",
     businessRules: [
@@ -1054,7 +1054,7 @@ end
     id: "loan_payoff",
     title: "LoanPayoffEngine Refactoring",
     domain: "Loan settlement and payoff",
-    durationMinutes: 45,
+    durationMinutes: 30,
     fileName: "loan_payoff_engine.rb",
     specFileName: "loan_payoff_engine_spec.rb",
     businessRules: [

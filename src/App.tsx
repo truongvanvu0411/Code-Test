@@ -5,8 +5,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertCircle,
-  Briefcase,
   CheckCircle2,
   ChevronRight,
   Download,
@@ -21,7 +19,6 @@ import {
   ShieldCheck,
   Square,
   Terminal,
-  Timer,
   X,
   UserPlus,
   Users
@@ -325,7 +322,7 @@ export default function App() {
 
     setImplementationCode(challenge.initialCode);
     setVisibleSpecCode(challenge.visibleSpec);
-    setTimeLeft(challenge.durationMinutes * 60);
+    setTimeLeft(30 * 60);
     setRunResult(null);
     setRunHistory([]);
     setSummary("");
@@ -348,7 +345,15 @@ export default function App() {
     setRecordingBlob(null);
 
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: "monitor" } as MediaTrackConstraints,
+        audio: true
+      });
+      const displaySurface = stream.getVideoTracks()[0]?.getSettings().displaySurface;
+      if (displaySurface && displaySurface !== "monitor") {
+        stream.getTracks().forEach((track) => track.stop());
+        throw new Error("Please select Entire Screen. Window or browser tab recording is not accepted.");
+      }
       streamRef.current = stream;
       chunksRef.current = [];
       const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
@@ -790,7 +795,7 @@ export default function App() {
 
               <div className="border border-slate-700 bg-slate-950 p-4">
                 <h2 className="font-semibold text-slate-100">{challenge?.domain || "Loading..."}</h2>
-                <p className="mt-2 text-sm text-slate-400">{challenge?.durationMinutes || 40} minutes</p>
+                <p className="mt-2 text-sm text-slate-400">30 minutes</p>
                 <ul className="mt-4 space-y-2 text-xs text-slate-500">
                   {(challenge?.rubric || []).map((item) => (
                     <li key={item} className="flex gap-2">
@@ -851,12 +856,21 @@ export default function App() {
             >
               <Save className="w-4 h-4" /> {isSubmitting ? "Saving..." : "Save Submission"}
             </button>
-            <button
-              onClick={() => setState("testing")}
-              className="px-5 py-3 border border-slate-300 text-slate-700 font-medium"
-            >
-              Back
-            </button>
+            {submissionId ? (
+              <button
+                onClick={logout}
+                className="px-5 py-3 border border-red-200 bg-red-50 text-red-700 font-bold"
+              >
+                Exit
+              </button>
+            ) : (
+              <button
+                onClick={() => setState("testing")}
+                className="px-5 py-3 border border-slate-300 text-slate-700 font-medium"
+              >
+                Back
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -895,34 +909,6 @@ export default function App() {
       </header>
 
       <main className="flex flex-1 min-h-0">
-        <aside className="w-72 border-r border-slate-800 bg-slate-900/50 overflow-y-auto p-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Briefcase className="w-4 h-4" /> Business Rules
-          </h2>
-          <ul className="mt-3 space-y-2 text-xs text-slate-400">
-            {(challenge?.businessRules || []).map((rule) => (
-              <li key={rule} className="border-l border-slate-700 pl-3 leading-relaxed">{rule}</li>
-            ))}
-          </ul>
-
-          <div className="mt-6 border-t border-slate-800 pt-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Process Signals</h3>
-            <div className="mt-3 space-y-2">
-              <Signal label="Baseline run" ok={runHistory.length > 0} />
-              <Signal label="Repeated verification" ok={runHistory.length >= 2} />
-              <Signal label="Visible specs pass" ok={Boolean(runResult?.visiblePassed)} />
-              <Signal label="Hidden specs pass" ok={Boolean(runResult?.hiddenPassed)} />
-              <Signal label="Recording captured" ok={Boolean(recordingBlob)} />
-            </div>
-          </div>
-
-          <div className="mt-6 border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-100">
-            <AlertCircle className="w-4 h-4 mb-2" />
-            Hidden spec details are summarized. Admin review combines specs, recording, and written notes.
-          </div>
-          {recordingError && <div className="mt-3 text-xs text-red-300">{recordingError}</div>}
-        </aside>
-
         <section className="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
           <div className="h-10 border-b border-slate-800 flex items-center bg-slate-900/60">
             <TabButton active={activeTab === "code"} onClick={() => setActiveTab("code")} label={challenge?.fileName || "implementation.rb"} />
@@ -1252,15 +1238,6 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
   );
 }
 
-function Signal({ label, ok }: { label: string; ok: boolean }) {
-  return (
-    <div className="flex items-center justify-between border border-slate-800 bg-slate-950 px-3 py-2 text-xs">
-      <span className="text-slate-400">{label}</span>
-      <span className={ok ? "text-emerald-400" : "text-slate-600"}>{ok ? "ok" : "pending"}</span>
-    </div>
-  );
-}
-
 function Metric({ label, value, dark }: { label: string; value: string; dark?: boolean }) {
   return (
     <div className={cn("border p-3", dark ? "border-slate-800 bg-slate-950" : "border-slate-200 bg-slate-50")}>
@@ -1283,12 +1260,12 @@ function TextArea({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-bold text-slate-900">{label}</span>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="mt-2 h-32 w-full border border-slate-300 p-3 outline-none focus:border-blue-500"
+        className="mt-2 h-32 w-full border border-slate-300 p-3 font-semibold text-slate-950 placeholder:text-slate-400 outline-none focus:border-blue-500"
       />
     </label>
   );
