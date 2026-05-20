@@ -108,6 +108,24 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+function apiErrorMessage(payload: unknown, status: number) {
+  if (payload && typeof payload === "object" && "error" in payload) {
+    return String((payload as { error?: unknown }).error || "Request failed");
+  }
+
+  if (typeof payload === "string") {
+    const compactPayload = payload.trim();
+    if (compactPayload.startsWith("<!DOCTYPE") || compactPayload.startsWith("<html")) {
+      return status === 502
+        ? "Server is temporarily unavailable. Please refresh and try again."
+        : `Server returned an unexpected HTML error page (${status}). Please refresh and try again.`;
+    }
+    return compactPayload || "Request failed";
+  }
+
+  return "Request failed";
+}
+
 async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     ...options,
@@ -116,7 +134,7 @@ async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
   const contentType = response.headers.get("content-type") || "";
   const payload = contentType.includes("application/json") ? await response.json() : await response.text();
   if (!response.ok) {
-    throw new Error(typeof payload === "string" ? payload : payload.error || "Request failed");
+    throw new Error(apiErrorMessage(payload, response.status));
   }
   return payload as T;
 }
@@ -130,7 +148,7 @@ export default function App() {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [implementationCode, setImplementationCode] = useState("");
   const [visibleSpecCode, setVisibleSpecCode] = useState("");
-  const [timeLeft, setTimeLeft] = useState(40 * 60);
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [activeTab, setActiveTab] = useState<ActiveTab>("code");
   const [logs, setLogs] = useState<string[]>([]);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
